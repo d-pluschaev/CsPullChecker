@@ -1,3 +1,12 @@
-For using:
+
+Pull Checker.
+Usage:
 1. Rename config.example to config.php
 2. In config.php set path to PEAR PHP_CodeSniffer classes or copy classes to include/cs/CodeSniffer
+3. You can use custom standard in include/cs/standard
+
+Pre-commit:
+Usage:
+1. Set correct path in "pre-commit" or copy PEAR PHP_CodeSniffer classes to cs/CodeSniffer
+2. Copy "pre-commit" and "cs" directory to <your-project>/.git/hooks and give to "pre-commit" executing permission
+3. You can use custom standard in include/cs/standard
