@@ -1,0 +1,10 @@
+.idea
+.readme
+tmp/*
+!tmp/.htaccess
+include/cs/CodeSniffer/*
+!include/cs/CodeSniffer/.readme
+include/standards/*
+!include/cs/standards/.readme
+config.php
+.git

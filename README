@@ -1,0 +1,3 @@
+For using:
+1. Rename config.example to config.php
+2. In config.php set path to PEAR PHP_CodeSniffer classes or copy classes to include/cs/CodeSniffer

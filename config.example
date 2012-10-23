@@ -1,0 +1,75 @@
+<?php
+
+$config = array(
+    'enabled_for_hosts' => array(
+        '192.168.3.13',
+    ),
+
+    'github' => array(
+
+        'api' => array(
+            'authenticate' => array(
+                'url' => '{WEB_PROTOCOL}{WEB_HOST}/login/oauth/authorize',
+                'content' => array(
+                    'client_id' => '{CLIENT_ID}',
+                    'client_secret' => '{CLIENT_SECRET}',
+                    'scope' => '{SCOPE}',
+                ),
+                'method' => 'GET',
+            ),
+            'authenticate_get_token' => array(
+                'url' => '{WEB_PROTOCOL}{WEB_HOST}/login/oauth/access_token',
+                'content' => array(
+                    'client_id' => '{CLIENT_ID}',
+                    'client_secret' => '{CLIENT_SECRET}',
+                    'code' => '{CODE}',
+                ),
+                'method' => 'GET',
+            ),
+            'get_pull_request' => array(
+                'url' => '{API_PROTOCOL}{API_HOST}/repos/{REPO}/pulls/{PULL}',
+                'content' => array(
+                    'access_token' => '{TOKEN}',
+                ),
+                'method' => 'GET',
+                'header' => array(
+                    'Authorization: {TOKEN} OAUTH-TOKEN',
+                ),
+            ),
+            'get_pull_request_diff' => array(
+                'url' => '{WEB_PROTOCOL}{TOKEN}@{WEB_HOST}/{REPO}/pull/{PULL}.diff',
+                'content' => array(),
+                'method' => 'GET',
+            ),
+            'get_file_by_sha_and_path' => array(
+                'url' => '{RAW_PROTOCOL}{TOKEN}@{RAW_HOST}/{REPO}/{FILE_SHA}/{FILE_PATH}',
+                'content' => array(),
+                'method' => 'GET',
+
+            ),
+        ),
+
+        'variables' => array(
+            'client_id' => '',
+            'client_secret' => '',
+            'scope' => 'repo',
+            'web_protocol' => 'https://',
+            'api_protocol' => 'https://',
+            'raw_protocol' => 'https://',
+            'web_host' => 'github.com',
+            'api_host' => 'api.github.com',
+            'raw_host' => 'raw.github.com',
+        ),
+
+        'token_file' => $root . 'tmp/auth_token',
+        'application_url' => 'http://sugarci.atwss.com:1080/',
+    ),
+
+    'cs' => array(
+        'classes_directory' => "{$root}include/cs/CodeSniffer",
+        'standard' => 'PSR2',
+    ),
+);
+
+
+

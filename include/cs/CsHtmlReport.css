@@ -1,0 +1,146 @@
+.report {
+    border: 1px solid #999;
+    font-size: 90%;
+    width: 100%;
+}
+
+.report th {
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    background-color: #eee;
+    padding: 3px;
+}
+
+.report th:last-child {
+    border-right: none;
+}
+
+.report tr td {
+    border-bottom: 2px solid #999;
+    border-right: 1px solid #ccc;
+    padding: 3px;
+    vertical-align: top;
+}
+
+.report tr td:last-child {
+    border-right: none;
+}
+
+.report td.file {
+    background-color: #ddd;
+    font-weight: bold;
+    border-bottom: 2px solid #999;
+    border-top: 1px solid #FFF;
+    padding: 0 8px 2px;
+}
+
+.report tr:last-child td {
+    border-bottom: none;
+}
+
+.report tr.even {
+    background-color: #ffffdd;
+}
+
+.report .e_item {
+    border-bottom: 1px solid #EEE;
+}
+
+.code {
+    white-space: nowrap;
+    background-color: #DDFFDD;
+    font-size: 80%;
+    width: 100%;
+}
+
+.report .code tr td {
+    border: none;
+    padding: 0 4px;
+    border-bottom: 1px solid #ccc;
+}
+
+.code .code_line {
+    background-color: #FFBBBB;
+}
+
+.code .code_bof, .code .code_eof {
+    background-color: #F5F5F5;
+    color: #AAA;
+}
+
+.report .code .code_ln {
+    width: 23px;
+    border-right: 1px solid #ccc;
+    text-align: right;
+    padding-right: 6px;
+}
+
+/* column specific */
+.th_number {
+    width: 14px;
+}
+
+.th_line {
+    width: 30px;
+}
+
+.th_col {
+    width: 22px;
+}
+
+.th_description {
+}
+
+.report td.td_number {
+    width: 14px;
+    color: #777;
+    text-align: right;
+}
+
+.td_line {
+    text-align: right;
+    width: 30px;
+}
+
+.td_col {
+    text-align: right;
+    width: 22px;
+}
+
+.report td.td_code {
+    padding: 0;
+    width: 50%;
+}
+
+.report td.td_grouped {
+    padding: 0;
+}
+
+.table_grouped {
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.table_grouped tr td {
+    border: 0;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+/* symbols */
+.sym_tab {
+    background-color: #eeeeee;
+    display: inline-block;
+    width: 20px;
+    height: 10px;
+    line-height: 10px;
+    font-size: 10px;
+    margin: 0 2px;
+}
+
+.highlight {
+    background-color: #FF7777;
+    display: inline-block;
+    padding: 0 1px;
+    cursor: default;
+}
