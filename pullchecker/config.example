@@ -67,7 +67,7 @@ $config = array(
 
     'cs' => array(
         'classes_directory' => "{$root}include/cs/CodeSniffer",
-        'standard' => 'PSR2',
+        'standard' => "{root}include/cs/standards/sugar_cs.xml",
     ),
 );
 

@@ -7,8 +7,8 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -25,9 +25,9 @@ if (class_exists('PEAR_Sniffs_Classes_ClassDeclarationSniff', true) === false) {
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.6
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @version   Release: 1.4.2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class PSR2_Sniffs_Classes_ClassDeclarationSniff extends PEAR_Sniffs_Classes_ClassDeclarationSniff
@@ -84,7 +84,7 @@ class PSR2_Sniffs_Classes_ClassDeclarationSniff extends PEAR_Sniffs_Classes_Clas
                                     $type,
                                     $spaces,
                                    );
-                    $phpcsFile->addError($error, $stackPtr, 'SpacesBeforeKeyword', $data);
+                    $phpcsFile->addError($error, $stackPtr, 'SpaceBeforeKeyword', $data);
                 }
             }
         }//end if
@@ -177,7 +177,11 @@ class PSR2_Sniffs_Classes_ClassDeclarationSniff extends PEAR_Sniffs_Classes_Clas
                 continue;
             }
 
-            if ($checkingImplements === true && $multiLineImplements === true) {
+            if ($checkingImplements === true
+                && $multiLineImplements === true
+                && ($tokens[($className - 1)]['code'] !== T_NS_SEPARATOR
+                || $tokens[($className - 2)]['code'] !== T_STRING)
+            ) {
                 $prev = $phpcsFile->findPrevious(
                     array(T_NS_SEPARATOR, T_WHITESPACE),
                     ($className - 1),
@@ -201,7 +205,9 @@ class PSR2_Sniffs_Classes_ClassDeclarationSniff extends PEAR_Sniffs_Classes_Clas
                         $phpcsFile->addError($error, $className, 'InterfaceWrongIndent', $data);
                     }
                 }
-            } else {
+            } else if ($tokens[($className - 1)]['code'] !== T_NS_SEPARATOR
+                || $tokens[($className - 2)]['code'] !== T_STRING
+            ) {
                 if ($tokens[($className - 1)]['code'] === T_COMMA
                     || ($tokens[($className - 1)]['code'] === T_NS_SEPARATOR
                     && $tokens[($className - 2)]['code'] === T_COMMA)
@@ -227,12 +233,14 @@ class PSR2_Sniffs_Classes_ClassDeclarationSniff extends PEAR_Sniffs_Classes_Clas
                 }//end if
             }//end if
 
-            if ($tokens[($className + 1)]['code'] !== T_COMMA) {
+            if ($tokens[($className + 1)]['code'] !== T_NS_SEPARATOR
+                && $tokens[($className + 1)]['code'] !== T_COMMA
+            ) {
                 if ($i !== ($classCount - 1)) {
                     // This is not the last class name, and the comma
                     // is not where we expect it to be.
                     if ($tokens[($className + 2)]['code'] !== T_IMPLEMENTS) {
-                        $error = 'Expected 0 spaces between "%s" and comma; $%s found';
+                        $error = 'Expected 0 spaces between "%s" and comma; %s found';
                         $data  = array(
                                   $tokens[$className]['content'],
                                   strlen($tokens[($className + 1)]['content']),

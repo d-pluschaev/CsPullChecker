@@ -16,7 +16,7 @@
  * - for API ones, parameter description should be in place
  *
  */
-class PSR2_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sniff
+class SugarCS_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sniff
 {
 
     /**

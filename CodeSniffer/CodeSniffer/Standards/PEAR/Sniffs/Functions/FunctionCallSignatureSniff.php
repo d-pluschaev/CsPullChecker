@@ -8,8 +8,8 @@
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -20,9 +20,9 @@
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.6
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @version   Release: 1.4.2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class PEAR_Sniffs_Functions_FunctionCallSignatureSniff implements PHP_CodeSniffer_Sniff
@@ -242,7 +242,16 @@ class PEAR_Sniffs_Functions_FunctionCallSignatureSniff implements PHP_CodeSniffe
                 }
 
                 if ($tokens[$i]['code'] !== T_WHITESPACE) {
-                    $foundIndent = 0;
+                    // Just check if it is a multi-line block comment. If so, we can
+                    // calculate the indent from the whitespace before the content.
+                    if ($tokens[$i]['code'] === T_COMMENT
+                        && $tokens[($i - 1)]['code'] === T_COMMENT
+                    ) {
+                        $trimmed     = ltrim($tokens[$i]['content']);
+                        $foundIndent = (strlen($tokens[$i]['content']) - strlen($trimmed));
+                    } else {
+                        $foundIndent = 0;
+                    }
                 } else {
                     $foundIndent = strlen($tokens[$i]['content']);
                 }
@@ -264,9 +273,16 @@ class PEAR_Sniffs_Functions_FunctionCallSignatureSniff implements PHP_CodeSniffe
                 continue;
             }
 
+            // Skip the rest of a short array.
+            if ($tokens[$i]['code'] === T_OPEN_SHORT_ARRAY) {
+                $i        = $tokens[$i]['bracket_closer'];
+                $lastLine = $tokens[$i]['line'];
+                continue;
+            }
+
             if ($this->allowMultipleArguments === false && $tokens[$i]['code'] === T_COMMA) {
                 // Comma has to be the last token on the line.
-                $next = $phpcsFile->findNext(T_WHITESPACE, ($i + 1), $closeBracket, true);
+                $next = $phpcsFile->findNext(array(T_WHITESPACE, T_COMMENT), ($i + 1), $closeBracket, true);
                 if ($next !== false
                     && $tokens[$i]['line'] === $tokens[$next]['line']
                 ) {

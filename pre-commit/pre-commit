@@ -5,12 +5,12 @@
  *
  * Call additional checks before commit. Can be used within PRE-COMMIT hook.
  *
- * by Dmitri Pluschaev d.pluschaev@intetics.com
+ * by Dmitri Pluschaev d.pluschaev@sugarcrm.com
  *
  */
 
 
-$standard = 'PSR2'; // dirname(__FILE__) . '/standards/cs/PSR2';
+$standard = dirname(__FILE__) . '/cs/standards/sugar_cs.xml';
 $allowed_extensions = array('php'); // lowercase
 $root=dirname(__FILE__) . '/';
 $project_dir=$root.'../../';
@@ -38,8 +38,8 @@ exec($get_diff, $out);
 $diff=analyzeDiff($out);
 foreach ($diff as $file=>$data) {
     // check extension
-    $pi = pathinfo($file);
-    if (in_array(strtolower($pi['extension']), $allowed_extensions)) {
+    $ext = pathinfo($file, PATHINFO_EXTENSION);
+    if (in_array(strtolower($ext), $allowed_extensions)) {
         // check location
         $file_abs = "$project_dir/$file";
         if (is_file($file_abs)) {
@@ -49,9 +49,15 @@ foreach ($diff as $file=>$data) {
 }
 
 // Execute checks
-$data = $csWrapper->cswExecute();
+try {
+    $data = @$csWrapper->cswExecute();
+} catch (Exception $e) {
+    m('Code sniffer error: ' . $e->getMessage());
+    m('Use --no-verify option to force commit');
+    die(1);
+}
 
-$result=generateShortReport($data);
+$result=generateShortReport((array)$data);
 m($result['message']."\r\n");
 
 m(($result['code'] ? 'Commit is not recommended' : 'Continue committing')."\r\n");
@@ -74,11 +80,9 @@ function analyzeDiff(array $diff, $rep_dir = '/')
         } elseif (preg_match("~^\+(.*)~", $row, $matches)) {
             $out[$path]['lines'][$line] = $matches[1];
             $line++;
-        } elseif (preg_match("~^[^-]+(.*)~", $row, $matches)) {
+        } elseif (!preg_match("~^-+.*~", $row, $matches)) {
             $line++;
-        } elseif (preg_match("~.+~", $row, $matches)) {
-	    $line++;
-	}
+        }
     }
     return $out;
 }

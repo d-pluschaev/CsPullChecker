@@ -7,8 +7,8 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -20,9 +20,9 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.6
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @version   Release: 1.4.2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class PSR2_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSniffer_Sniff
@@ -67,13 +67,7 @@ class PSR2_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
         $caseCount     = 0;
         $foundDefault  = false;
 
-        while (($nextCase = $phpcsFile->findNext(array(T_CASE, T_DEFAULT, T_SWITCH), ($nextCase + 1), $switch['scope_closer'])) !== false) {
-            // Skip nested SWITCH statements; they are handled on their own.
-            if ($tokens[$nextCase]['code'] === T_SWITCH) {
-                $nextCase = $tokens[$nextCase]['scope_closer'];
-                continue;
-            }
-
+        while (($nextCase = $this->_findNextCase($phpcsFile, ($nextCase + 1), $switch['scope_closer'])) !== false) {
             if ($tokens[$nextCase]['code'] === T_DEFAULT) {
                 $type         = 'default';
                 $foundDefault = true;
@@ -106,7 +100,7 @@ class PSR2_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
             }
 
             if ($type === 'case'
-                && ($tokens[($nextCase + 1)]['type'] !== 'T_WHITESPACE'
+                && ($tokens[($nextCase + 1)]['code'] !== T_WHITESPACE
                 || $tokens[($nextCase + 1)]['content'] !== ' ')
             ) {
                 $error = 'CASE keyword must be followed by a single space';
@@ -114,9 +108,14 @@ class PSR2_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
             }
 
             $opener = $tokens[$nextCase]['scope_opener'];
-            if ($tokens[($opener - 1)]['type'] === 'T_WHITESPACE') {
-                $error = 'There must be no space before the colon in a '.strtoupper($type).' statement';
-                $phpcsFile->addError($error, $nextCase, 'SpaceBeforeColon'.$type);
+            if ($tokens[$opener]['code'] === T_COLON) {
+                if ($tokens[($opener - 1)]['code'] === T_WHITESPACE) {
+                    $error = 'There must be no space before the colon in a '.strtoupper($type).' statement';
+                    $phpcsFile->addError($error, $nextCase, 'SpaceBeforeColon'.$type);
+                }
+            } else {
+                $error = strtoupper($type).' statements must not be defined using curly braces';
+                $phpcsFile->addError($error, $nextCase, 'WrongOpener'.$type);
             }
 
             $nextCloser = $tokens[$nextCase]['scope_closer'];
@@ -143,26 +142,50 @@ class PSR2_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
             );
 
             if ($tokens[$nextCode]['code'] !== T_CASE && $tokens[$nextCode]['code'] !== T_DEFAULT) {
-                // This case statement has content. If the next case of default comes
+                // This case statement has content. If the next case or default comes
                 // before the closer, it means we dont have a terminating statement
                 // and instead need a comment.
-                $nextCode = $phpcsFile->findNext(
-                    array(T_CASE, T_DEFAULT),
-                    ($tokens[$nextCase]['scope_opener'] + 1),
-                    $nextCloser
-                );
-
-                if ($nextCode !== FALSE) {
+                $nextCode = $this->_findNextCase($phpcsFile, ($tokens[$nextCase]['scope_opener'] + 1), $nextCloser);
+                if ($nextCode !== false) {
                     $prevCode = $phpcsFile->findPrevious(T_WHITESPACE, ($nextCode - 1), $nextCase, true);
                     if ($tokens[$prevCode]['code'] !== T_COMMENT) {
                         $error = 'There must be a comment when fall-through is intentional in a non-empty case body';
                         $phpcsFile->addError($error, $nextCase, 'TerminatingComment');
                     }
                 }
-            }//end if
+            }
         }//end while
 
     }//end process()
+
+
+    /**
+     * Find the next CASE or DEFAULT statement from a point in the file.
+     *
+     * Note that nested switches are ignored.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
+     * @param int                  $stackPtr  The position to start looking at.
+     * @param int                  $end       The position to stop looking at.
+     *
+     * @return int | bool
+     */
+    private function _findNextCase(PHP_CodeSniffer_File $phpcsFile, $stackPtr, $end)
+    {
+        $tokens = $phpcsFile->getTokens();
+        while (($stackPtr = $phpcsFile->findNext(array(T_CASE, T_DEFAULT, T_SWITCH), $stackPtr, $end)) !== false) {
+            // Skip nested SWITCH statements; they are handled on their own.
+            if ($tokens[$stackPtr]['code'] === T_SWITCH) {
+                $stackPtr = $tokens[$stackPtr]['scope_closer'];
+                continue;
+            }
+
+            break;
+        }
+
+        return $stackPtr;
+
+    }//end _findNextCase()
 
 
 }//end class

@@ -11,7 +11,7 @@
  * Parses and verifies the doc comments for classes.
  *
  */
-class PSR2_Sniffs_Commenting_ClassCommentSniff extends PEAR_Sniffs_Commenting_ClassCommentSniff
+class SugarCS_Sniffs_Commenting_ClassCommentSniff extends PEAR_Sniffs_Commenting_ClassCommentSniff
 {
     protected $tags = array(
                        'api'   => array(

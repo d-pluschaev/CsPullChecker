@@ -35,6 +35,11 @@
  </rule>
 
  <!-- There MUST NOT be trailing whitespace at the end of non-blank lines. -->
+ <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
+  <properties>
+   <property name="ignoreBlankLines" value="true"/>
+   </properties>
+ </rule>
  <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace.StartFile">
   <severity>0</severity>
  </rule>
@@ -140,7 +145,11 @@
  There MUST be one space between the closing parenthesis and the opening brace
  The structure body MUST be indented once
  The closing brace MUST be on the next line after the body -->
- <rule ref="Squiz.ControlStructures.ControlSignature"/>
+ <rule ref="Squiz.ControlStructures.ControlSignature">
+  <properties>
+   <property name="ignoreComments" value="true"/>
+  </properties>
+ </rule>
  <rule ref="Squiz.WhiteSpace.ScopeClosingBrace"/>
  <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration"/>
  <rule ref="Squiz.ControlStructures.ForLoopDeclaration"/>

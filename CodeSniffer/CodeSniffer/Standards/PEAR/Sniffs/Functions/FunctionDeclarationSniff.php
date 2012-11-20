@@ -7,8 +7,8 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -20,9 +20,9 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.6
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @version   Release: 1.4.2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class PEAR_Sniffs_Functions_FunctionDeclarationSniff implements PHP_CodeSniffer_Sniff
@@ -105,7 +105,7 @@ class PEAR_Sniffs_Functions_FunctionDeclarationSniff implements PHP_CodeSniffer_
         }//end if
 
         // Check if this is a single line or multi-line declaration.
-        $singleLine = false;
+        $singleLine = true;
         if ($tokens[$openBracket]['line'] === $tokens[$closeBracket]['line']) {
             // Closures may use the USE keyword and so be multi-line in this way.
             if ($tokens[$stackPtr]['code'] === T_CLOSURE) {
@@ -114,13 +114,13 @@ class PEAR_Sniffs_Functions_FunctionDeclarationSniff implements PHP_CodeSniffer_
                     // are also on the same line, this is a single line declaration.
                     $open  = $phpcsFile->findNext(T_OPEN_PARENTHESIS, ($use + 1));
                     $close = $tokens[$open]['parenthesis_closer'];
-                    if ($tokens[$open]['line'] === $tokens[$close]['line']) {
-                        $singleLine = true;
+                    if ($tokens[$open]['line'] !== $tokens[$close]['line']) {
+                        $singleLine = false;
                     }
                 }
-            } else {
-                $singleLine = true;
             }
+        } else {
+            $singleLine = false;
         }
 
         if ($singleLine === true) {

@@ -9,8 +9,8 @@
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -109,9 +109,9 @@
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006-2011 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.6
+ * @copyright 2006-2012 Squiz Pty Ltd (ABN 77 084 670 600)
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @version   Release: 1.4.2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class PHP_CodeSniffer_File
@@ -467,7 +467,9 @@ class PHP_CodeSniffer_File
                 if (isset($parts[3]) === true) {
                     $source   = $parts[0].'.'.$parts[2].'.'.substr($parts[3], 0, -5);
                     $patterns = $this->phpcs->getIgnorePatterns($source);
-                    foreach ($patterns as $pattern) {
+                    foreach ($patterns as $pattern => $type) {
+                        // While there is support for a type of each pattern
+                        // (absolute or relative) we don't actually support it here.
                         $replacements = array(
                                          '\\,' => ',',
                                          '*'   => '.*',
@@ -605,6 +607,20 @@ class PHP_CodeSniffer_File
         $this->_tokens   = self::tokenizeString($contents, $tokenizer, $this->eolChar);
         $this->numTokens = count($this->_tokens);
 
+        // Check for mixed line endings as these can cause tokenizer errors and we
+        // should let the user know that the results they get may be incorrect.
+        // This is done by removing all backslashes, removing the newline char we
+        // detected, then converting newlines chars into text. If any backslashes
+        // are left at the end, we have additional newline chars in use.
+        $contents = str_replace('\\', '', $contents);
+        $contents = str_replace($this->eolChar, '', $contents);
+        $contents = str_replace("\n", '\n', $contents);
+        $contents = str_replace("\r", '\r', $contents);
+        if (preg_match('/(\\\\.)+/', $contents) === 1) {
+            $error = 'File has mixed line endings; this may cause incorrect results';
+            $this->addWarning($error, 0, 'Internal.LineEndings.Mixed');
+        }
+
         if (PHP_CODESNIFFER_VERBOSITY > 0) {
             if ($this->numTokens === 0) {
                 $numLines = 0;
@@ -683,7 +699,7 @@ class PHP_CodeSniffer_File
      * @param int    $stackPtr The stack position where the error occured.
      * @param string $code     A violation code unique to the sniff message.
      * @param array  $data     Replacements for the error message.
-     * @param int    $severity The severity level for this error. A value of
+     * @param int    $severity The severity level for this error. A value of 0
      *                         will be converted into the default severity level.
      *
      * @return void
@@ -716,6 +732,15 @@ class PHP_CodeSniffer_File
             }
         }
 
+        // Make sure this message type has not been set to "warning".
+        if (isset($this->ruleset[$sniff]['type']) === true
+            && $this->ruleset[$sniff]['type'] === 'warning'
+        ) {
+            // Pass this off to the warning handler.
+            $this->addWarning($error, $stackPtr, $code, $data, $severity);
+            return;
+        }
+
         // Make sure we are interested in this severity level.
         if (isset($this->ruleset[$sniff]['severity']) === true) {
             $severity = $this->ruleset[$sniff]['severity'];
@@ -729,7 +754,9 @@ class PHP_CodeSniffer_File
 
         // Make sure we are not ignoring this file.
         $patterns = $this->phpcs->getIgnorePatterns($sniff);
-        foreach ($patterns as $pattern) {
+        foreach ($patterns as $pattern => $type) {
+            // While there is support for a type of each pattern
+            // (absolute or relative) we don't actually support it here.
             $replacements = array(
                              '\\,' => ',',
                              '*'   => '.*',
@@ -789,7 +816,7 @@ class PHP_CodeSniffer_File
      * @param int    $stackPtr The stack position where the error occured.
      * @param string $code     A violation code unique to the sniff message.
      * @param array  $data     Replacements for the warning message.
-     * @param int    $severity The severity level for this warning. A value of
+     * @param int    $severity The severity level for this warning. A value of 0
      *                         will be converted into the default severity level.
      *
      * @return void
@@ -822,6 +849,15 @@ class PHP_CodeSniffer_File
             }
         }
 
+        // Make sure this message type has not been set to "error".
+        if (isset($this->ruleset[$sniff]['type']) === true
+            && $this->ruleset[$sniff]['type'] === 'error'
+        ) {
+            // Pass this off to the error handler.
+            $this->addError($warning, $stackPtr, $code, $data, $severity);
+            return;
+        }
+
         // Make sure we are interested in this severity level.
         if (isset($this->ruleset[$sniff]['severity']) === true) {
             $severity = $this->ruleset[$sniff]['severity'];
@@ -835,7 +871,9 @@ class PHP_CodeSniffer_File
 
         // Make sure we are not ignoring this file.
         $patterns = $this->phpcs->getIgnorePatterns($sniff);
-        foreach ($patterns as $pattern) {
+        foreach ($patterns as $pattern => $type) {
+            // While there is support for a type of each pattern
+            // (absolute or relative) we don't actually support it here.
             $replacements = array(
                              '\\,' => ',',
                              '*'   => '.*',
