@@ -14,3 +14,4 @@ pre-commit/cs/standards/*
 !pre-commit/cs/standards/.readme
 
 .git
+*.tar.gz

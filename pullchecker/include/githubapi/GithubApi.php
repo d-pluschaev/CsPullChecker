@@ -137,7 +137,9 @@ class GithubApi extends HTTPRequestClass
                 $line++;
             } elseif (preg_match("~^[^-]+(.*)~", $row, $matches)) {
                 $line++;
-            }
+            } elseif (preg_match("~.+~", $row, $matches)) {
+		$line++;
+	    }
         }
         return $out;
     }
